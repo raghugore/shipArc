@@ -1,0 +1,223 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                        String               @id @default(cuid())
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  createdBy                 User?                @relation("UserCreator", fields: [createdById], references: [id])
+  createdById               String?
+  updatedBy                 User?                @relation("UserUpdater", fields: [updatedById], references: [id])
+  updatedById               String?
+  name                      String
+  email                     String               @unique
+  password                  String
+  phone                     String
+  designation               String
+  empid                     String?
+  company                   Company?             @relation("CompanyUsers", fields: [companyId], references: [id])
+  companyId                 String?
+  vessel                    Vessel?              @relation(fields: [vesselId], references: [id])
+  vesselId                  String?
+  rewards                   Reward[]             @relation("UserReward")
+  socs                      Soc[]
+  isSuperAdmin              Boolean
+  createdUsers              User[]               @relation("UserCreator")
+  updatedUsers              User[]               @relation("UserUpdater")
+  createdCompanies          Company[]            @relation("CompanyCreator")
+  updatedCompanies          Company[]            @relation("CompanyUpdater")
+  createdVessels            Vessel[]             @relation("VesselCreator")
+  updatedVessels            Vessel[]             @relation("VesselUpdater")
+  createdContactUs          ContactUs[]          @relation("ContactUsCreator")
+  updatedContactUs          ContactUs[]          @relation("ContactUsUpdater")
+  createdRedeemableProducts RedeemableProducts[] @relation("RedeemableProductsCreator")
+  updatedRedeemableProducts RedeemableProducts[] @relation("RedeemableProductsUpdater")
+  createdRewards            Reward[]             @relation("RewardCreator")
+  updatedRewards            Reward[]             @relation("RewardUpdater")
+  createdSocQuestions       SocQuestion[]        @relation("SocQuestionCreator")
+  updatedSocQuestions       SocQuestion[]        @relation("SocQuestionUpdater")
+  createdSocQuestionMasters SocQuestionMaster[]  @relation("SocQuestionMasterCreator")
+  updatedSocQuestionMasters SocQuestionMaster[]  @relation("SocQuestionMasterUpdater")
+  createdSocAnswers         SocAnswer[]          @relation("SocAnswerCreator")
+  updatedSocAnswers         SocAnswer[]          @relation("SocAnswerUpdater")
+  createdSocs               Soc[]                @relation("SocCreator")
+  updatedSocs               Soc[]                @relation("SocUpdater")
+  createdTrainings          Training[]           @relation("TrainingCreator")
+  updatedTrainings          Training[]           @relation("TrainingUpdater")
+  adminForCompany           Company?             @relation("CompanyAdmin")
+}
+
+model Company {
+  id                 String               @id @default(cuid())
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  createdBy          User?                @relation("CompanyCreator", fields: [createdById], references: [id])
+  createdById        String?
+  updatedBy          User?                @relation("CompanyUpdater", fields: [updatedById], references: [id])
+  updatedById        String?
+  name               String
+  users              User[]               @relation("CompanyUsers")
+  vessels            Vessel[]
+  accessEnabled      Boolean
+  userLimit          Int
+  socQuestions       SocQuestion[]
+  redeemableProducts RedeemableProducts[]
+  adminId            String?
+  admin              User?                @relation("CompanyAdmin", fields: [adminId], references: [id])
+  socs               Soc[]
+  trainings          Training[]
+}
+
+model Vessel {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User?    @relation("VesselCreator", fields: [createdById], references: [id])
+  createdById String?
+  updatedBy   User?    @relation("VesselUpdater", fields: [updatedById], references: [id])
+  updatedById String?
+  name        String
+  company     Company  @relation(fields: [companyId], references: [id])
+  companyId   String
+  users       User[]
+}
+
+model ContactUs {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User?    @relation("ContactUsCreator", fields: [createdById], references: [id])
+  createdById String?
+  updatedBy   User?    @relation("ContactUsUpdater", fields: [updatedById], references: [id])
+  updatedById String?
+  name        String
+  email       String
+  phone       String
+  enquiryType String
+  message     String
+}
+
+model RedeemableProducts {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User?    @relation("RedeemableProductsCreator", fields: [createdById], references: [id])
+  createdById String?
+  updatedBy   User?    @relation("RedeemableProductsUpdater", fields: [updatedById], references: [id])
+  updatedById String?
+  product     String
+  category    String
+  points      Int
+  active      Boolean
+  startDate   DateTime
+  endDate     DateTime
+  company     Company  @relation(fields: [companyId], references: [id])
+  companyId   String
+}
+
+model Reward {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User?    @relation("RewardCreator", fields: [createdById], references: [id])
+  createdById String?
+  updatedBy   User?    @relation("RewardUpdater", fields: [updatedById], references: [id])
+  updatedById String?
+  userId      String
+  user        User     @relation("UserReward", fields: [userId], references: [id])
+  type        String
+  points      Int
+}
+
+model SocQuestion {
+  id           String      @id @default(cuid())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  createdBy    User?       @relation("SocQuestionCreator", fields: [createdById], references: [id])
+  createdById  String?
+  updatedBy    User?       @relation("SocQuestionUpdater", fields: [updatedById], references: [id])
+  updatedById  String?
+  question     String
+  type         String
+  options      Json?
+  maxSelection Int?
+  company      Company     @relation(fields: [companyId], references: [id])
+  companyId    String
+  socAnswers   SocAnswer[]
+  page         Int
+  order        Int
+  category     String
+}
+
+model SocQuestionMaster {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    User?    @relation("SocQuestionMasterCreator", fields: [createdById], references: [id])
+  createdById  String?
+  updatedBy    User?    @relation("SocQuestionMasterUpdater", fields: [updatedById], references: [id])
+  updatedById  String?
+  question     String
+  type         String
+  options      Json?
+  maxSelection Int?
+  page         Int
+  order        Int
+}
+
+model SocAnswer {
+  id          String       @id @default(cuid())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdBy   User?        @relation("SocAnswerCreator", fields: [createdById], references: [id])
+  createdById String?
+  updatedBy   User?        @relation("SocAnswerUpdater", fields: [updatedById], references: [id])
+  updatedById String?
+  questionId  String?
+  question    SocQuestion? @relation(fields: [questionId], references: [id])
+  answer      String
+  socId       String
+  options     Json?
+  files       Json?
+  soc         Soc          @relation(fields: [socId], references: [id])
+}
+
+model Soc {
+  id          String      @id @default(cuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdBy   User?       @relation("SocCreator", fields: [createdById], references: [id])
+  createdById String?
+  updatedBy   User?       @relation("SocUpdater", fields: [updatedById], references: [id])
+  updatedById String?
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id])
+  company     Company     @relation(fields: [companyId], references: [id])
+  companyId   String
+  socAnswers  SocAnswer[]
+}
+
+model Training {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User?    @relation("TrainingCreator", fields: [createdById], references: [id])
+  createdById String?
+  updatedBy   User?    @relation("TrainingUpdater", fields: [updatedById], references: [id])
+  updatedById String?
+  company     Company  @relation(fields: [companyId], references: [id])
+  companyId   String
+  name        String
+  description String
+  duration    Int
+  points      Int
+}
