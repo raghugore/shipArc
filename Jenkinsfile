@@ -6,7 +6,7 @@ pipeline{
   stages{
     stage('Build'){
       steps{
-        sh 'npm install yarn'
+        sh 'npm install --legacy-peer-deps'
         }
       }
   } 
